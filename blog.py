@@ -16,13 +16,13 @@ urls = (
 t_globals = {
 	'datestr': web.datestr
 }
-render = web.templates.render('templates', base='base', globals=t_globals)
+render = web.template.render('templates', base='base', globals=t_globals)
 
 class Index:
 	def GET(self):
 		"""Show page"""
-		posts = model.get_post()
-		return render.view(posts)
+		posts = model.get_posts()
+		return render.index(posts)
 
 class View:
 	def GET(self, id):
@@ -34,10 +34,10 @@ class New:
 	form = web.form.Form(
 		web.form.Textbox('title', web.form.notnull,
 			size=30,
-			description="Post title:")
+			description="Post title:"),
 		web.form.Textarea('content', web.form.notnull,
 			rows=30, cols=80,
-			description="Post content:")
+			description="Post content:"),
 		web.form.Button('Post entry'),
 		)
 
@@ -57,12 +57,12 @@ class Delete:
 		model.del_post(int(id))
 		raise web.seeother('/')
 
-class Eidt:
+class Edit:
 	def GET(self, id):
 		post = model.get_post(int(id))
 		form = New.form()
 		form.fill(post)
-		return  render.edit(post, form)
+		return render.edit(post, form)
 
 	def POST(self, id):
 		form = New.form()
@@ -70,10 +70,9 @@ class Eidt:
 		if not form.validates():
 			return render.edit(post, form)
 		model.update_post(int(id), form.d.title, form.d.content)
-		raise web.seeother()
+		raise web.seeother('/')
 
 app = web.application(urls, globals())
 
-if __name__='__main__':
+if __name__=='__main__':
 	app.run()
-
